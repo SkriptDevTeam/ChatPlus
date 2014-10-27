@@ -1,0 +1,202 @@
+#
+# SDT - Skript Development Team
+# http://skript.pl
+#
+# "Chat+" v1.0
+# - - - - - - -
+# [PiratJaskiniowy, sebafudi, warpath124]
+#
+
+
+on chat:
+
+	# emotikony i obrazki
+	player has permission "chatplus.emotki":
+		replace all ":)" and "(:" in message with "☺"
+		replace all "):" and ":(" in message with "☹"
+		replace all "-_*" in message with "ツ"
+	
+		replace all "<3" in message with "❤"
+		replace all "*mail" in message with "✉"
+		replace all "*music" in message with "♪♫♫♪"
+		replace all "*sun" in message with "☼"
+		replace all "*fm" in message with "♀"
+		replace all "*m" in message with "♂"
+		replace all "*3" in message with "ω"
+		replace all "*airplane" in message with "✈"
+		replace all "*phone" in message with "☎"
+		replace all "*radioactive" in message with "☢"
+		replace all "*bio" in message with "☣"
+		replace all "*?" in message with "�"
+		replace all "*scizz" in message with "✂"
+		replace all "*arrow" in message with "➳"
+		replace all "*8" in message with "☃"
+		replace all "*flower" in message with "✿"
+		replace all "*o" in message with "•"
+		replace all "*hospital" and "*+" in message with "✚"
+	
+		replace all "*v" in message with "✔"
+		replace all "*x" in message with "✘"
+		replace all "*[]" in message with "☐"
+		replace all "*[v]" and "[v]" in message with "☑"
+		replace all "*[x]" and "[x]" in message with "☒"
+	
+		replace all "*c" in message with "©"
+		replace all "*r" in message with "®"
+
+		replace all "->" and "*->" in message with "→"
+		replace all "<-" and "*<-" in message with "←"
+		replace all "\/" and "*\/" in message with "↓"
+		replace all "/\" and "*/\" in message with "↑"
+		replace all ">>" and "*>>" in message with "»"
+		replace all "<<" and "*<<" in message with "«"
+		replace all "*<" in message with "◄"
+		replace all "*>" in message with "►"
+	
+		replace all "[\" and "[/" in message with "░"
+		replace all "[}" and "{]" and "}]" in message with "▒"
+		replace all "[|" and "|]" in message with "▓"
+		replace all "[]" in message with "█"
+	
+	# lokacja gracza
+	player has permission "chatplus.loc":
+		replace all ":loc:" in message with "&f[&e%rounded x location of player%&f|&e%rounded y location of player%&f|&e%rounded z location of player%&f]"
+
+	# tęczowy tekst
+	# (wymaga dodania możliwości pogrubienia teksu)
+	player has permission "chatplus.tecza":
+		set {_zabezpieczenie} to 0
+		while message contains "&t":
+			add 1 to {_zabezpieczenie}
+			{_zabezpieczenie} is more than 10:
+				stop
+			set {_t} to first index of "&t" in message # pozycja tagu (&t) do formatowania
+	
+			set {_tf} to subtext of message from character ({_t}) to character (length of message) # tekst do formatowania łącznie z tekstem po nim
+			replace "&t" in {_tf} with "" # usuwanie tagu z tekstu do formatowania
+	
+			set {_nc1} to (first index of "&" in {_tf} - 1) # pozycja ewentualnego nastepnego tagu
+			{_nc1} is -1:                       # gdyby nie było następnego tagu 
+				set {_nc1} to (length of {_tf}) # przypisywana jest pozycja ostatniego znaku tekstu
+			set {_nc2} to (first index of "@" in {_tf} - 1)
+			{_nc2} is -1:
+				set {_nc2} to (length of {_tf})
+			set {_nc3} to (first index of "&f[&e%rounded x location of player%&f|&e%rounded y location of player%&f|&e%rounded z location of player%&f]" in {_tf} - 1)
+			{_nc3} is -1:
+				set {_nc3} to (length of {_tf})
+			
+			{_nc1} is less than {_nc2} and {_nc3}:
+				set {_nc} to {_nc1}
+			{_nc2} is less than {_nc3} and {_nc1}:
+				set {_nc} to {_nc2}
+			{_nc3} is less than {_nc1} and {_nc2}:
+				set {_nc} to {_nc3}
+	
+			set {_tf} to subtext of {_tf} from characters 1 to ({_nc}) # usuwanie tekstu do formatowania od następnego tagu
+			
+			set {_tf::*} to {_tf} split at ""
+			set {_nr} to 1 # predefiniowanie
+			set {_w} to "" # pomocniczych zmiennych
+			loop {_tf::*}:
+				loop-value is "":
+					delete {_tf::%loop-index%}
+				loop-value is " ":
+					set {_w} to "%{_w}% "
+				loop-value is not "" or " ":
+					{_nr} is 1:
+						set {_c} to "&5"
+					{_nr} is 2:
+						set {_c} to "&1"
+					{_nr} is 3:
+						set {_c} to "&9"
+					{_nr} is 4:
+						set {_c} to "&2"
+					{_nr} is 5:
+						set {_c} to "&a"
+					{_nr} is 6:
+						set {_c} to "&e"
+					{_nr} is 7:
+						set {_c} to "&6"
+					{_nr} is 8:
+						set {_c} to "&c"
+					{_nr} is 9:
+						set {_c} to "&4"
+					set {_w} to "%{_w}%%{_c}%%loop-value%"
+				add 1 to {_nr}
+				{_nr} is 10:
+					set {_nr} to 1
+			replace "&t%{_tf}%" in message with "%{_w}%&r"
+	
+	# oznaczanie graczy
+	player has permission "chatplus.oznacz":
+		loop all players:
+			message contains "@%loop-player%":
+				replace "@%loop-player%" in message with "&b@%loop-player%&r"
+				execute console command "playsound random.pop %loop-player%"
+
+	# kolorowanie wiadomości
+	player has permission "chatplus.kolory":
+		set message to colored message
+
+# komenda pomocy
+command /chatplus [<text>]:
+	aliases: chat+, c+
+	trigger:
+		arg is "4":
+			send "&9█&2█&a█&e█&6█&c█&4█&5█&1█ &f&lChat+"
+			send "&1█ &f/\&7, &f*/\ &7- ↑"
+			send "&5█ &f>>&7, &f*>> &7- »"
+			send "&4█ &f<<&7, &f*<< &7- «"
+			send "&c█ &f*< &7- ◄"
+			send "&6█ &f*> &7- ►"
+			send "&e█ &f[\&7, &f[/ &7- ░"
+			send "&a█ &f[}&7, &f{]&7, &f}] &7- ▒"
+			send "&9█ &f[|&7, &f|] &7- ▓"
+			send "&1█ &f[] &7- █"
+			send "&5█ SDT - Skript Development Team (skript.pl)"
+			send "&4█ &5PiratJaskiniowy, sebafudi, warpath124"
+			send "&c█&6█&e█ &e(4/4)"
+			stop
+		arg is "3":
+			send "&9█&2█&a█&e█&6█&c█&4█&5█&1█ &f&lChat+"
+			send "&1█ &f*hospital&7, &f*+ &7- ✚"
+			send "&5█ &f*v &7- ✔"
+			send "&4█ &f*x &7- ✘"
+			send "&c█ &f*[] &7- ☐"
+			send "&6█ &f*[v]&7, &f[v] &7- ☑"
+			send "&e█ &f*[x]&7, &f[x] &7- ☒"
+			send "&a█ &f*c &7- ©"
+			send "&9█ &f*r &7- ®"
+			send "&1█ &f->&7, &f*-> &7- →"
+			send "&5█ &f<-&7, &f*<- &7- ←"
+			send "&4█ &f\/&7, &f*\/ &7- ↓"
+			send "&c█&6█&e█ &e(3/4) » /c+ 4"
+			stop
+		arg is "2":
+			send "&9█&2█&a█&e█&6█&c█&4█&5█&1█ &f&lChat+"
+			send "&1█ &f*3 &7- ω"
+			send "&5█ &f*airplane &7- ✈"
+			send "&4█ &f*phone &7- ☎"
+			send "&c█ &f*radioactive &7- ☢"
+			send "&6█ &f*bio &7- ☣"
+			send "&e█ &f*? &7- �"
+			send "&a█ &f*scizz &7- ✂"
+			send "&9█ &f*arrow &7- ➳"
+			send "&1█ &f*8 &7- ☃"
+			send "&5█ &f*flower &7- ✿"
+			send "&4█ &f*o &7- •"
+			send "&c█&6█&e█ &e(2/4) » /c+ 3"
+			stop
+		send "&9█&2█&a█&e█&6█&c█&4█&5█&1█ &f&lChat+"
+		send "&1█ &f&t &7- teczowy tekst, &f@nick &7- oznacza gracza"
+		send "&5█ &f:loc: &7- lokacja gracza"
+		send "&4█ &f:)&7, &f(: &7- ☺"
+		send "&c█ &f:(&7, &f): &7- ☹"
+		send "&6█ &f-_* &7- ツ"
+		send "&e█ &f<3 &7- ❤"
+		send "&a█ &f*mail &7- ✉"
+		send "&9█ &f*music &7- ♪♫♫♪"
+		send "&1█ &f*sun &7- ☼"
+		send "&5█ &f*fm &7- ♀"
+		send "&4█ &f*m &7- ♂"
+		send "&c█&6█&e█ &e(1/4) » /c+ 2"
